@@ -1,0 +1,15 @@
+bin_local_settings.py
+.directory
+.project
+.settings
+.vscode/
+.idea/
+*/local_settings.py
+*~
+*.bak
+*.bin
+*.dat
+*.db
+*.ex
+*.pyc
+*.sqlite
