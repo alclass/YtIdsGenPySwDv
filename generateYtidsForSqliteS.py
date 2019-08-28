@@ -37,13 +37,7 @@ def process():
 
   :return:
   '''
-  # parameters
-  n_of_ytids_to_generate = 100
-  # if bool_store_ytids_on_disk is False, all ids will be kept on RAM
-  # if bool_store_ytids_on_disk is True, all ids will be kept on disk in Sqlite
-  bool_store_ytids_on_disk = False
-  
-  YtIdGenerator(n_generate = 100, bool_store_on_disk = False)
+  YtIdGenerator()
 
 if __name__ == '__main__':
   process()
