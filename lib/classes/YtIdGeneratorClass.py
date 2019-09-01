@@ -2,12 +2,32 @@
 '''
 
 '''
-import random, string # sqlite3
+import os, random, string, sqlite3
 import lib.functions.str_adjust_functions as strfuns
+import lib.functions.random_functions as randf
 
 YTIDCHARLENGTH = 11
 base64chars = string.ascii_uppercase + string.ascii_lowercase + string.digits + '-' + '_'
 assert 64, len(base64chars)
+
+def sqlite_open():
+  currentFile = __file__  # May be 'my_script', or './my_script' or
+  # '/home/user/test/my_script.py' depending on exactly how
+  # the script was run/loaded.
+  realPath = os.path.realpath(currentFile)  # /home/user/test/my_script.py
+  dirPath = os.path.dirname(realPath)  # /home/user/test
+  # dirName = os.path.basename(dirPath)
+  sqlite_filename = 'ytids.sql'
+  filepath = os.path.join(dirPath, sqlite_filename)
+  conn = sqlite3.connect(filepath)
+  create_sql = '''
+    CREATE TABLE `ytids` (
+	    `ytid`	TEXT,
+	    PRIMARY KEY(`ytid`)
+  );
+    '''
+  conn.execute(create_sql)
+  return conn
 
 class YtIdGenerator:
   '''
@@ -16,7 +36,12 @@ class YtIdGenerator:
   def __init__(self, n_generate=100, bool_store_on_disk = False):
     self.ytid = None
     self.n_generate = n_generate
+    self.conn = False
+    self.bool_store_on_disk = bool_store_on_disk
+    if self.bool_store_on_disk:
+      self.conn = sqlite_open()
     self.generate_ytids()
+
 
   def generate_ytids(self):
     '''
@@ -27,7 +52,14 @@ class YtIdGenerator:
     for i in range(1, self.n_generate+1):
       self.generate_ytid()
       self.fix_ytid_if_needed()
-      assert 11, len(self.ytid)
+      if self.bool_store_on_disk:
+        if self.conn:
+          sqlinsert = '''
+          INSERT INTO ytids (ytid) VALUES (?);
+          '''
+          cursor = self.conn
+          cursor.execute(sqlinsert, self.ytid)
+          self.conn.commit()
       print (i, self.ytid)
 
   def generate_ytid(self):
@@ -38,44 +70,26 @@ class YtIdGenerator:
   def fix_ytid_if_needed(self):
     '''
 
-      If it's all numbers, include one Uppercase and one lowercase and return
-      If word == lower(word), then an Uppercase is missing, get one there and return
-      If word == upper(word), then a lowercase is missing, get one there and return
+      There are only 2 (two) restrictions imposed on ytid, they are:
 
-      Not testing for:
+      1) it must contain at least one lowercase letter
+      2) it must contain at least one uppercase letter
 
-      1) all characters are - or _ -> reason: it's very unprobable
-      2) all characters are -, _ or numbers -> reason: this id is okay
-      3) all characters are lowercsse or Uppercase letters -> reason: this id is okay
+      This method modifies a ytid to constrain it to the above two restrictions.
 
-      On the same token, ids having
-      1) all numbers (first if above),
-      2) lowercase letters without at least one Uppercase letter or,
-      3) invertedly, Uppercase letters without at least one lowercase letter
+      1) first, an if asks if at least one lowercase letter exists in word, if not, put it there
+      2) second, an if asks if at least one uppercase letter exists in word, if not, put it there
 
-      are transformed into the following:
-
-      for 1 above => include 1 Uppercase and 1 lowercase letters
-      for 2 above => swap one random lowercase letter to its Uppercase counterpart
-      for 3 above => swap one random Uppercase letter to its lowercase counterpart
-
-      There are unittests for these 3 hypotheses.
+      There are unittests for the two restrictions above.
 
     :return:
     '''
     #print (ytid)
-    if strfuns.isItAllNumbers(self.ytid):
-      self.ytid = self.include_one_Upper_n_one_lower()
-      return
-    if self.ytid == self.ytid.lower():
-      self.swap_one_random_lowercaseletter_to_an_Uppercaseletter()
-      return
-    if self.ytid == self.ytid.upper():
-      self.swap_one_random_Uppercaseletter_to_a_lowercaseletter()
-      return
+    self.ytid = randf.check_the_2_restrictions_n_modify_id_if_needed(self.ytid)
 
   def include_one_Upper_n_one_lower(self):
     '''
+    This method is no longer used due to having a new strategy (the check 2 restriction function)
 
     :return:
     '''
@@ -91,6 +105,7 @@ class YtIdGenerator:
 
   def swap_one_random_lowercaseletter_to_an_Uppercaseletter(self):
     '''
+    This method is no longer used due to having a new strategy (the check 2 restriction function)
 
     :return:
     '''
@@ -104,7 +119,7 @@ class YtIdGenerator:
 
   def swap_one_random_Uppercaseletter_to_a_lowercaseletter(self):
     '''
-
+    This method is no longer used due to having a new strategy (the check 2 restriction function)
     :return:
     '''
     self.ytid = strfuns.swap_one_random_Uppercaseletter_to_a_lowercaseletter(

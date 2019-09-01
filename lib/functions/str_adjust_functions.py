@@ -4,6 +4,9 @@
 
   Functions for checking or adjusting strings.
 '''
+
+import random, string
+
 # lambda-based functions
 lamb_clean_borders = lamb_clean_borders = lambda c : c.strip(' \t\r\n')
 def clean_entry_borders(entries):
@@ -64,6 +67,8 @@ def modify_word_with_char_at_position(word, character, indexAt):
 
 def swap_one_random_lowercaseletter_to_an_Uppercaseletter(word):
   '''
+  This function is not used anymore, it's here as a historical record
+  This function has unit tests
   '''
   print ('BEFORE: ', word, ' <= to Upper')
   charlist = list(word)
@@ -82,14 +87,17 @@ def swap_one_random_lowercaseletter_to_an_Uppercaseletter(word):
     #return False
     error_msg = 'Failed in swap_one_random_lowercaseletter_to_an_Uppercaseletter() lowercase not found in %s' %self.ytid
     raise ValueError(error_msg)
-  indexAt = self.ytid.index(lowercaseletter)
+  indexAt = word.index(lowercaseletter)
   Uppercaseletter = lowercaseletter.upper()
-  word = strfuns.modify_word_with_char_at_position(word, Uppercaseletter, indexAt)
+  word = modify_word_with_char_at_position(word, Uppercaseletter, indexAt)
   return word
-
 
 def swap_one_random_Uppercaseletter_to_a_lowercaseletter(word):
   '''
+  This function is not used anymore, it's here as a historical record
+  The reason for its deprecation is that
+    a new strategy was taken to put a letter (upper or lowercase) to the word
+  This function has unit tests
   '''
   print ('BEFORE: ', word, ' <= to lower')
   charlist = list(word)
@@ -109,7 +117,7 @@ def swap_one_random_Uppercaseletter_to_a_lowercaseletter(word):
     error_msg = 'Failed in swap_one_random_Uppercaseletter_to_a_lowercaseletter() Uppercase not found in %s' %self.ytid
     raise ValueError(error_msg)
   # the indexAt above may be wrong, because the while-loop may delete elements; the downside is if a letter is repeated, what is, on the same token, very unlikely
-  indexAt = self.ytid.index(Uppercaseletter)
+  indexAt = word.index(Uppercaseletter)
   lowercaseletter = Uppercaseletter.lower()
-  word = strfuns.modify_word_with_char_at_position(word, lowercaseletter, indexAt)
+  word = modify_word_with_char_at_position(word, lowercaseletter, indexAt)
   return word

@@ -4,6 +4,7 @@ bin_local_settings.py
 .settings
 .vscode/
 .idea/
+data/
 */local_settings.py
 */**/__pycache__/*
 *~
@@ -12,5 +13,7 @@ bin_local_settings.py
 *.dat
 *.db
 *.ex
+*.png
 *.pyc
+*.sqbpro
 *.sqlite
