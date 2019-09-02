@@ -17,17 +17,39 @@ def sqlite_open():
   realPath = os.path.realpath(currentFile)  # /home/user/test/my_script.py
   dirPath = os.path.dirname(realPath)  # /home/user/test
   # dirName = os.path.basename(dirPath)
-  sqlite_filename = 'ytids.sql'
+  sqlite_filename = 'ytids.sqlite'
   filepath = os.path.join(dirPath, sqlite_filename)
   conn = sqlite3.connect(filepath)
   create_sql = '''
-    CREATE TABLE `ytids` (
+    CREATE TABLE if not exists `ytids` (
 	    `ytid`	TEXT,
 	    PRIMARY KEY(`ytid`)
   );
     '''
   conn.execute(create_sql)
   return conn
+
+lambda_elems = lambda e : e[0]
+def fromTupleElementsToElements(sqlresult):
+  return list(map(lambda_elems, sqlresult))
+
+class YtIdDBReader:
+
+  def __init__(self, n_read=100):
+    pass
+
+  def readAll(self):
+    '''
+
+    :return:
+    '''
+    self.conn = sqlite_open()
+    sqlselect = 'SELECT ytid FROM ytids';
+    cursor = self.conn.cursor()
+    result = cursor.execute(sqlselect)
+    if result is None:
+      return []
+    return fromTupleElementsToElements( result.fetchall() )
 
 class YtIdGenerator:
   '''
@@ -38,10 +60,18 @@ class YtIdGenerator:
     self.n_generate = n_generate
     self.conn = False
     self.bool_store_on_disk = bool_store_on_disk
+    self.process()
+
+  def process(self):
+    '''
+
+    :return:
+    '''
     if self.bool_store_on_disk:
       self.conn = sqlite_open()
     self.generate_ytids()
-
+    if self.bool_store_on_disk:
+      self.conn.close()
 
   def generate_ytids(self):
     '''
@@ -57,8 +87,9 @@ class YtIdGenerator:
           sqlinsert = '''
           INSERT INTO ytids (ytid) VALUES (?);
           '''
-          cursor = self.conn
-          cursor.execute(sqlinsert, self.ytid)
+          print (self.ytid)
+          cursor = self.conn.cursor()
+          cursor.execute(sqlinsert, (str(self.ytid),))
           self.conn.commit()
       print (i, self.ytid)
 

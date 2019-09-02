@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+##!/usr/bin/env python3
 '''
 
 From the page below:
@@ -28,11 +28,11 @@ cur = conn.cursor()
 
 
 '''
-# import random, sqlite3, string
-# import lib.functions.str_adjust_functions as strfuns
+import sys
 from lib.classes.YtIdGeneratorClass import YtIdGenerator
 
-def process():
+
+def process(n_generate, bool_store_on_disk):
   '''
 
   :return:
@@ -42,8 +42,33 @@ def process():
   # if bool_store_ytids_on_disk is False, all ids will be kept on RAM
   # if bool_store_ytids_on_disk is True, all ids will be kept on disk in Sqlite
   bool_store_ytids_on_disk = False
-  
-  YtIdGenerator(n_generate = 100, bool_store_on_disk = False)
+
+  YtIdGenerator(n_generate, bool_store_on_disk)
+
+
+n_generate_DEFAULT = 100
+bool_store_on_disk_DEFAULT = True
+
+
+def getArgs():
+  n_generate = n_generate_DEFAULT
+  bool_store_on_disk = bool_store_on_disk_DEFAULT
+  for arg in sys.argv:
+    if arg.startswith('-n='):
+      try:
+        n_generate = int(arg[len('-n='):])
+      except ValueError:
+        pass
+    elif arg.startswith('-s='):
+      try:
+        yes_or_no = arg[len('-s='):]
+        if yes_or_no == 'n':
+          bool_store_on_disk = False
+      except ValueError:
+        pass
+  return n_generate, bool_store_on_disk
+
 
 if __name__ == '__main__':
-  process()
+  n_generate, bool_store_on_disk = getArgs()
+  process(n_generate, bool_store_on_disk)
